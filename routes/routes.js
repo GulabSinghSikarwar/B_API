@@ -70,6 +70,7 @@ router.post('/reset', (req, resp, next) => {
     if (req.session.isLoggedIn) {
         console.log("already login ");
 
+
         User.resetPassword(username, password).then((result) => {
             resp.status(200).json(result);
 
@@ -85,6 +86,19 @@ router.post('/reset', (req, resp, next) => {
 })
 router.get('/', (req, resp, next) => {
     resp.json("Home")
+})
+router.get('/getData', (req, resp, next) => {
+
+    console.log(" req.session .user", req.session.user);
+    const id = req.session.user._id;
+
+    console.log("req  session user: ", req.session.user);
+    User.getUserInfo(id).then((userdata) => {
+        resp.status(200).json(userdata)
+
+    }).catch((err) => {
+        console.log(err);
+    })
 })
 
 

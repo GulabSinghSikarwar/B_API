@@ -1,3 +1,4 @@
+const mongodb = require('mongodb')
 const { get } = require('express/lib/response');
 
 const getdb = require('../utils/database').getdb
@@ -30,13 +31,18 @@ module.exports = class User {
         const db = getdb();
         return db.collection('users').findOne({ username: username }).then((user) => {
 
+
             if (!user) {
                 return Promise.reject("Wrong Email ")
             } else {
                 let matched = false;
                 if (user.password === password) {
                     matched = true;
+                    db.collection('login_record').insertOne({ user_id: user._id, time: new Date(Date.now()) }).then((result) => {
+
+                    }).catch((err) => { console.log(err) })
                     return Promise.resolve(user);
+
                 } else {
                     return Promise.reject("Wrong Email or Password ")
                 }
@@ -63,6 +69,27 @@ module.exports = class User {
                 });
 
         }).catch((err) => { console.log(err); })
+
+    }
+    static getUserInfo(id) {
+        const db = getdb();
+
+        return db.collection('users').findOne({ _id: new mongodb.ObjectId(id) }).then((user) => {
+
+            return db.collection('login_record').find({ user_id: new mongodb.ObjectId(user._id) }).toArray().then((time_records) => {
+                return {
+                    user_data: {...user },
+                    user_login_record: [...time_records]
+                }
+
+            }).catch((time_records_err) => { console.log(time_records_err) })
+
+
+        }).catch((err) => {
+
+        })
+
+
 
     }
 
